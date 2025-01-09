@@ -480,6 +480,7 @@ dependencies = [
  "edge-http",
  "edge-nal",
  "embedded-io",
+ "embedded-io-async",
  "esp-alloc",
  "esp-backtrace",
  "esp-hal",
