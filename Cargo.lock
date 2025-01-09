@@ -61,7 +61,7 @@ dependencies = [
  "embedded-io",
  "heapless",
  "log",
- "smoltcp",
+ "smoltcp 0.11.0",
 ]
 
 [[package]]
@@ -181,6 +181,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "edge-nal-embassy"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae3c210c904d95704e0e1df473256c3673abbc9a36a2dd9a7f7ecc2e3715591e"
+dependencies = [
+ "edge-nal",
+ "embassy-futures",
+ "embassy-net",
+ "embedded-io-async",
+ "heapless",
+]
+
+[[package]]
 name = "embassy-embedded-hal"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -202,6 +215,23 @@ name = "embassy-futures"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f878075b9794c1e4ac788c95b728f26aa6366d32eeb10c7051389f898f7d067"
+
+[[package]]
+name = "embassy-net"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49f9f2979069031c153e41075a43074c36a64492e598780b27944a605f829d23"
+dependencies = [
+ "document-features",
+ "embassy-net-driver",
+ "embassy-sync",
+ "embassy-time",
+ "embedded-io-async",
+ "embedded-nal-async",
+ "heapless",
+ "managed",
+ "smoltcp 0.12.0",
+]
 
 [[package]]
 name = "embassy-net-driver"
@@ -313,6 +343,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ff09972d4073aa8c299395be75161d582e7629cd663171d62af73c8d50dba3f"
 dependencies = [
  "embedded-io",
+]
+
+[[package]]
+name = "embedded-nal"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c56a28be191a992f28f178ec338a0bf02f63d7803244add736d026a471e6ed77"
+dependencies = [
+ "nb 1.1.0",
+]
+
+[[package]]
+name = "embedded-nal-async"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76959917cd2b86f40a98c28dd5624eddd1fa69d746241c8257eac428d83cb211"
+dependencies = [
+ "embedded-io-async",
+ "embedded-nal",
 ]
 
 [[package]]
@@ -479,6 +528,7 @@ dependencies = [
  "blocking-network-stack",
  "edge-http",
  "edge-nal",
+ "edge-nal-embassy",
  "embedded-io",
  "embedded-io-async",
  "esp-alloc",
@@ -488,7 +538,7 @@ dependencies = [
  "esp-wifi",
  "heapless",
  "log",
- "smoltcp",
+ "smoltcp 0.11.0",
 ]
 
 [[package]]
@@ -554,7 +604,7 @@ dependencies = [
  "portable-atomic",
  "portable_atomic_enum",
  "rand_core",
- "smoltcp",
+ "smoltcp 0.11.0",
 ]
 
 [[package]]
@@ -969,6 +1019,19 @@ dependencies = [
  "cfg-if",
  "heapless",
  "log",
+ "managed",
+]
+
+[[package]]
+name = "smoltcp"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dad095989c1533c1c266d9b1e8d70a1329dd3723c3edac6d03bbd67e7bf6f4bb"
+dependencies = [
+ "bitflags 1.3.2",
+ "byteorder",
+ "cfg-if",
+ "heapless",
  "managed",
 ]
 

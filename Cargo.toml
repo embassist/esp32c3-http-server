@@ -48,6 +48,8 @@ heapless = { version = "0.8.0", default-features = false }
 # ANCHOR: fixing_deps
 log = { version = "0.4.22", default-features = false }
 anyhow = { version = "1.0.95", default-features = false }
+#futures-lite = { version = "2.5.0", default-features = false, features = ["futures-io"] }
+#env_logger = { version = "0.11.6", default-features = false }
 # ANCHOR_END: fixing_deps
 
 # ANCHOR: uncomment
@@ -86,6 +88,6 @@ edge-nal = { version = "0.4.2", default-features = false }
 #edge-raw = { version = "0.4.0", default-features = false, features = ["io"] }
 #edge-ws = { version = "0.4.0", default-features = false, features = ["io"] }
 #edge-nal-std = { version = "0.4.0", default-features = false }
-#edge-nal-embassy = { version = "0.4.1", default-features = false }
+edge-nal-embassy = { version = "0.4.1", default-features = false }
 # ANCHOR_END: uncomment
 # ANCHOR_END: server_deps

@@ -4,7 +4,7 @@
 // ANCHOR: client_deps
 extern crate alloc;
 use esp_hal::{
-    prelude::{entry, CpuClock},
+    prelude::{CpuClock},
     rng::Rng,
     time::{self, Duration},
 };
@@ -12,7 +12,6 @@ use esp_alloc as _;
 use esp_backtrace as _;
 use esp_println::{print, println};
 
-use blocking_network_stack::Stack;
 use esp_wifi::{
     init,
     wifi::{
@@ -33,7 +32,6 @@ use edge_http::io::server::{Connection, DefaultServer, Handler};
 use edge_http::Method;
 use edge_nal::TcpBind;
 use embedded_io_async::{Read, Write};
-use log::info;
 // ANCHOR: debug_deps
 use anyhow;
 // ANCHOR_END: debug_deps
@@ -42,7 +40,7 @@ use anyhow;
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
 
-#[entry]
+#[esp_hal::prelude::entry]
 fn main() -> ! {
     let peripherals = esp_hal::init({
         let mut config = esp_hal::Config::default();
@@ -130,7 +128,7 @@ fn main() -> ! {
     socket_set.add(dhcp_socket);
     // Wait for getting an ip address
     let now = || time::now().duration_since_epoch().to_millis();
-    let wifi_stack = Stack::new(iface, device, socket_set, now, rng.random());
+    let wifi_stack = blocking_network_stack::Stack::new(iface, device, socket_set, now, rng.random());
     println!("Wait to get an ip address");
     loop {
         wifi_stack.work();
@@ -142,56 +140,67 @@ fn main() -> ! {
     }
     // ANCHOR_END: ip
 
-    println!("Start busy loop on main");
+    // ANCHOR: server_loop
+    let mut server = DefaultServer::new();
 
-    let mut rx_buffer = [0u8; 1536];
-    let mut tx_buffer = [0u8; 1536];
-    let mut socket = wifi_stack.get_socket(&mut rx_buffer, &mut tx_buffer);
-
-    use embedded_io::{Read, Write};
+    // futures_lite::future::block_on(run(&mut server)).unwrap();
     loop {
-        println!("Making HTTP request");
-        socket.work();
 
-        socket
-            .open(IpAddress::Ipv4(Ipv4Address::new(142, 250, 185, 115)), 80)
-            .unwrap();
-
-        socket
-            .write(b"GET / HTTP/1.0\r\nHost: www.mobile-j.de\r\n\r\n")
-            .unwrap();
-        socket.flush().unwrap();
-
-        // ANCHOR: reponse
-        let deadline = time::now() + Duration::secs(20);
-        let mut buffer = [0u8; 512];
-        while let Ok(len) = socket.read(&mut buffer) {
-            let to_print = unsafe { core::str::from_utf8_unchecked(&buffer[..len]) };
-            print!("{}", to_print);
-
-            if time::now() > deadline {
-                println!("Timeout");
-                break;
-            }
-        }
-        println!();
-        // ANCHOR_END: reponse
-
-        // ANCHOR: socket_close
-        socket.disconnect();
-
-        let deadline = time::now() + Duration::secs(5);
-        while time::now() < deadline {
-            socket.work();
-        }
-        // ANCHOR_END: socket_close
     }
+    // ANCHOR_END: server_loop
+
+    // ANCHOR: client_loop
+    // println!("Start busy loop on main");
+    //
+    // let mut rx_buffer = [0u8; 1536];
+    // let mut tx_buffer = [0u8; 1536];
+    // let mut socket = wifi_stack.get_socket(&mut rx_buffer, &mut tx_buffer);
+    //
+    // use embedded_io::{Read, Write};
+    // loop {
+    //     println!("Making HTTP request");
+    //     socket.work();
+    //
+    //     socket
+    //         .open(IpAddress::Ipv4(Ipv4Address::new(142, 250, 185, 115)), 80)
+    //         .unwrap();
+    //
+    //     socket
+    //         .write(b"GET / HTTP/1.0\r\nHost: www.mobile-j.de\r\n\r\n")
+    //         .unwrap();
+    //     socket.flush().unwrap();
+    //
+    //     // ANCHOR: reponse
+    //     let deadline = time::now() + Duration::secs(20);
+    //     let mut buffer = [0u8; 512];
+    //     while let Ok(len) = socket.read(&mut buffer) {
+    //         let to_print = unsafe { core::str::from_utf8_unchecked(&buffer[..len]) };
+    //         print!("{}", to_print);
+    //
+    //         if time::now() > deadline {
+    //             println!("Timeout");
+    //             break;
+    //         }
+    //     }
+    //     println!();
+    //     // ANCHOR_END: reponse
+    //
+    //     // ANCHOR: socket_close
+    //     socket.disconnect();
+    //
+    //     let deadline = time::now() + Duration::secs(5);
+    //     while time::now() < deadline {
+    //         socket.work();
+    //     }
+    //     // ANCHOR_END: socket_close
+    // }
+    // ANCHOR_END: client_loop
 }
 
 pub async fn run(server: &mut DefaultServer) -> Result<(), anyhow::Error> {
     let addr = "0.0.0.0:8881";
 
-    info!("Running HTTP server on {addr}");
+    log::info!("Running HTTP server on {addr}");
 
     let acceptor = edge_nal_std::Stack::new()
         .bind(addr.parse().unwrap())
@@ -205,10 +214,7 @@ pub async fn run(server: &mut DefaultServer) -> Result<(), anyhow::Error> {
 struct HttpHandler;
 
 impl Handler for HttpHandler {
-    type Error<E>
-    = edge_http::io::Error<E>
-    where
-        E: Debug;
+    type Error<E> = edge_http::io::Error<E> where E: Debug;
 
     async fn handle<T, const N: usize>(
         &self,
