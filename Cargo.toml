@@ -1,93 +1,32 @@
 [package]
-name = "esp-http-client"
+name = "http-server"
 version = "0.1.0"
-authors = ["cxllmerichie <contact@cxllmerichie.com>"]
+authors = [
+    "Anatol Ulrich <anatol.ulrich@ferrous-systems.com>",
+    "Sergio Gasquez <sergio.gasquez@gmail.com>",
+]
 edition = "2021"
-license = "MIT"
 resolver = "2"
 
+[[bin]]
+name = "http-server"
+harness = false # We can't use the default rust libtest harness for a crosscompile target
+
 [profile.release]
-lto = "off"
-opt-level = 3
+opt-level = "s"
+
 [profile.dev]
-lto = "off"
+debug     = true # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
 
 [dependencies]
-# ANCHOR: client_deps
-esp-alloc = "0.5.0"
-esp-hal = { version = "0.22.0", features = ["esp32c3"] }
-blocking-network-stack = { git = "https://github.com/bjoernQ/blocking-network-stack.git", rev = "1c581661d78e0cf0f17b936297179b993fb149d7" }
-esp-backtrace = { version = "0.14.2", features = [
-    "esp32c3",
-    "panic-handler",
-    "exception-handler",
-    "println",
-] }
-esp-println = { version = "0.12.0", features = ["esp32c3"] }
-esp-wifi = { version = "0.11.0", features = [
-    "esp32c3",
-    "wifi",
-    "utils",
-] }
-smoltcp = { version = "0.11.0", default-features = false, features = [
-    "proto-igmp",
-    "proto-ipv4",
-    "socket-tcp",
-    "socket-icmp",
-    "socket-udp",
-    "medium-ethernet",
-    "proto-dhcpv4",
-    "socket-raw",
-    "socket-dhcpv4",
-] }
-embedded-io = "0.6.1"
-heapless = { version = "0.8.0", default-features = false }
-# ANCHOR_END: client_deps
+anyhow       = "=1.0.86"
+embedded-svc = "=0.28.0"
+esp-idf-svc  = "=0.49.0"
+shtcx        = "=1.0.0"
+toml-cfg     = "=0.1.3"
+wifi         = { path = "/lib" }
 
-# ANCHOR: server_deps
-# ANCHOR: fixing_deps
-log = { version = "0.4.22", default-features = false }
-anyhow = { version = "1.0.95", default-features = false }
-#futures-lite = { version = "2.5.0", default-features = false, features = ["futures-io"] }
-#env_logger = { version = "0.11.6", default-features = false }
-# ANCHOR_END: fixing_deps
-
-# ANCHOR: uncomment
-#log = "0.4"
-#anyhow = "1"
-#env_logger = "0.10"
-embedded-io-async = "0.6"
-#embassy-time = { version = "0.3", features = ["std", "generic-queue"] }
-#embassy-sync = "0.6"
-#embassy-futures = "0.1"
-#embedded-svc = { version = "0.28", features = ["std"] }
-#futures-lite = "2"
-#rand = "0.8"
-#tokio = "1" # For the `mqtt_client` example
-#async-compat = "0.2" # For the `mqtt_client` example
-# ANCHOR_END: uncomment
-
-# ANCHOR: duplicating_deps
-#embassy-futures = { version = "0.1", default-features = false }
-#embassy-sync = { version = "0.6", default-features = false }
-#embassy-time = { version = "0.3", default-features = false }
-#embedded-io-async = { version = "0.6", default-features = false }
-#embedded-svc = { version = "0.28", default-features = false }
-#log = { version = "0.4", default-features = false }
-#heapless = { version = "0.8", default-features = false }
-# ANCHOR_END: duplicating_deps
-
-# ANCHOR: uncomment
-#domain = { version = "0.10", default-features = false, features = ["heapless"] }
-#edge-captive = { version = "0.4.0", default-features = false, features = ["io"] }
-#edge-dhcp = { version = "0.4.0", default-features = false, features = ["io"] }
-edge-http = { version = "0.4.1", default-features = false, features = ["io"] }
-#edge-mdns = { version = "0.4.0", default-features = false, features = ["io"] }
-#edge-mqtt = { version = "0.4.0", default-features = false }
-edge-nal = { version = "0.4.2", default-features = false }
-#edge-raw = { version = "0.4.0", default-features = false, features = ["io"] }
-#edge-ws = { version = "0.4.0", default-features = false, features = ["io"] }
-#edge-nal-std = { version = "0.4.0", default-features = false }
-edge-nal-embassy = { version = "0.4.1", default-features = false }
-# ANCHOR_END: uncomment
-# ANCHOR_END: server_deps
+[build-dependencies]
+embuild  = "=0.32.0"
+toml-cfg = "=0.1.3"
