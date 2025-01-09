@@ -44,7 +44,12 @@ embedded-io = "0.6.1"
 heapless = { version = "0.8.0", default-features = false }
 # ANCHOR_END: client_deps
 
-# ANCHOR_END: server_deps
+# ANCHOR: server_deps
+# ANCHOR: fixing_deps
+log = { version = "0.4.22", default-features = false }
+anyhow = { version = "1.0.95", default-features = false }
+# ANCHOR_END: fixing_deps
+
 # ANCHOR: uncomment
 #log = "0.4"
 #anyhow = "1"
@@ -66,7 +71,7 @@ heapless = { version = "0.8.0", default-features = false }
 #embassy-time = { version = "0.3", default-features = false }
 #embedded-io-async = { version = "0.6", default-features = false }
 #embedded-svc = { version = "0.28", default-features = false }
-log = { version = "0.4", default-features = false }
+#log = { version = "0.4", default-features = false }
 #heapless = { version = "0.8", default-features = false }
 # ANCHOR_END: duplicating_deps
 

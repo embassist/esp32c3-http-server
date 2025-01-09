@@ -4,7 +4,7 @@
 // ANCHOR: client_deps
 extern crate alloc;
 use esp_hal::{
-    prelude::*,
+    prelude::{entry, CpuClock},
     rng::Rng,
     time::{self, Duration},
 };
@@ -13,7 +13,6 @@ use esp_backtrace as _;
 use esp_println::{print, println};
 
 use blocking_network_stack::Stack;
-use embedded_io::*;
 use esp_wifi::{
     init,
     wifi::{
@@ -28,18 +27,20 @@ use smoltcp::{
 };
 // ANCHOR_END: client_deps
 
-// // ANCHOR: server_deps
+// ANCHOR: server_deps
 use core::fmt::{Debug, Display};
 //
 use edge_http::io::server::{Connection, DefaultServer, Handler};
-use edge_http::io::Error;
 use edge_http::Method;
 use edge_nal::TcpBind;
 //
 // use embedded_io_async::{Read, Write};
 //
 use log::info;
-// // ANCHOR_END: server_deps
+// ANCHOR: debug_deps
+use anyhow;
+// ANCHOR_END: debug_deps
+// ANCHOR_END: server_deps
 
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
@@ -150,6 +151,7 @@ fn main() -> ! {
     let mut tx_buffer = [0u8; 1536];
     let mut socket = wifi_stack.get_socket(&mut rx_buffer, &mut tx_buffer);
 
+    use embedded_io::{Read, Write};
     loop {
         println!("Making HTTP request");
         socket.work();
@@ -207,7 +209,7 @@ fn main() -> ! {
 //
 // impl Handler for HttpHandler {
 //     type Error<E>
-//     = Error<E>
+//     = edge_http::io::Error<E>
 //     where
 //         E: Debug;
 //
