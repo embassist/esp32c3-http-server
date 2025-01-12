@@ -1,9 +1,12 @@
 /.idea/
 /.vscode/
 /.espressif/
-/.embuild/
 /target/
+/.embuild/
 Cargo.lock
 *.lock
 **/*.rs.bk
 /.devcontainer/
+/.github/
+*.md
+LICENSE-*
