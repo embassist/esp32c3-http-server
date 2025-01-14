@@ -1,66 +1,28 @@
-[package]
-name = "esp-idf-svc"
-version = "0.50.1"
-authors = ["Ivan Markov <ivan.markov@gmail.com>"]
-edition = "2021"
+[workspace]
 resolver = "2"
-categories = ["embedded", "hardware-support"]
-keywords = ["embedded", "svc", "idf", "esp-idf", "esp32"]
-description = "Implementation of the embedded-svc traits for ESP-IDF (Espressif's IoT Development Framework)"
-repository = "https://github.com/esp-rs/esp-idf-svc"
-license = "MIT OR Apache-2.0"
-readme = "README.md"
-links = "esp_idf_svc"
-build = "build.rs"
-documentation = "https://docs.esp-rs.org/esp-idf-svc/"
-rust-version = "1.77"
-
-[lib]
-harness = false
-
-[features]
-default = ["std", "binstart"]
-
-std = ["alloc", "log/std", "esp-idf-hal/std", "embedded-svc/std", "futures-io"]
-alloc = ["esp-idf-hal/alloc", "embedded-svc/alloc", "uncased/alloc"]
-nightly = ["embedded-svc/nightly", "esp-idf-hal/nightly"]
-experimental = ["embedded-svc/experimental", "esp-idf-hal/experimental"]
-
-# Propagated esp-idf-hal features
-critical-section = ["esp-idf-hal/critical-section"]
-wake-from-isr = ["esp-idf-hal/wake-from-isr"]
-embassy-sync = ["esp-idf-hal/embassy-sync"]
-
-# The next are propagated from esp-idf-sys via esp-idf-hal
-native = ["esp-idf-hal/native"]
-pio = ["esp-idf-hal/pio"]
-alloc_handler = ["esp-idf-hal/alloc_handler"]
-panic_handler = ["esp-idf-hal/panic_handler"]
-binstart = ["esp-idf-hal/binstart"]
-libstart = ["esp-idf-hal/libstart"]
-
-[dependencies]
-heapless = { version = "0.8", default-features = false }
-num_enum = { version = "0.7", default-features = false }
-enumset = { version = "1", default-features = false }
-log = { version = "0.4", default-features = false }
-uncased = { version = "0.9.7", default-features = false }
-embedded-hal-async = { version = "1", default-features = false }
-embedded-svc = { version = "0.28", default-features = false }
-esp-idf-hal = { version = "0.45", default-features = false }
-embassy-time-driver = { version = "0.1", optional = true, features = ["tick-hz-1_000_000"] }
-embassy-futures = "0.1"
-embedded-storage = { version = "0.3", optional = true }
-futures-io = { version = "0.3", optional = true }
-
-[build-dependencies]
-embuild = "0.33"
-
-[dev-dependencies]
-anyhow = "1"
-esp-idf-sys = { version = "0.36", features = ["binstart"] }
-futures = "0.3"
-serde = { version = "1", default-features = false, features = ["derive"] }
-serde_json = { version = "1", default-features = false, features = ["alloc"] }
-postcard = "1"
-async-io = "2"
+members  = ["xtask"]
+exclude  = [
+    "esp-alloc",
+    "esp-backtrace",
+    "esp-build",
+    "esp-config",
+    "esp-hal",
+    "esp-hal-embassy",
+    "esp-hal-procmacros",
+    "esp-ieee802154",
+    "esp-lp-hal",
+    "esp-metadata",
+    "esp-println",
+    "esp-riscv-rt",
+    "esp-wifi",
+    "esp-storage",
+    "examples",
+    "extras/bench-server",
+    "extras/esp-wifishark",
+    "extras/ieee802154-sniffer",
+    "hil-test",
+    "qa-test",
+    "xtensa-lx",
+    "xtensa-lx-rt",
+    "xtensa-lx-rt/procmacros",
+]
