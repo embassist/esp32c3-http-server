@@ -2,6 +2,7 @@
 1. Make use of https://github.com/filipton/esp-hal-mdns.
 2. Move project structure into non-lib setup, with `esp-hal` as dependency, using https://github.com/esp-rs/esp-generate
 accordingly to https://docs.esp-rs.org/book/writing-your-own-application/generate-project/index.html.
+3. Make use of toml-config, to move sensitive data out of `.cargo/config.toml`.
 
 ### Notes:
 1. Since of: https://github.com/embassy-rs/static-cell/issues/16, the note
