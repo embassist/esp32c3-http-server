@@ -1,5 +1,3 @@
-//% FEATURES: embassy embassy-generic-timers esp-wifi esp-wifi/wifi esp-wifi/utils esp-wifi/sniffer esp-hal/unstable
-
 #![no_std]
 #![no_main]
 
@@ -7,18 +5,12 @@ use core::{net::Ipv4Addr, str::FromStr};
 
 use embassy_executor::Spawner;
 use embassy_net::{
-    tcp::TcpSocket,
-    IpListenEndpoint,
-    Ipv4Cidr,
-    Runner,
-    Stack,
-    StackResources,
-    StaticConfigV4,
+    tcp::TcpSocket, IpListenEndpoint, Ipv4Cidr, Runner, Stack, StackResources, StaticConfigV4,
 };
 use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
-use esp_hal::{clock::CpuClock, rng::Rng, timer::timg::TimerGroup, timer::systimer::SystemTimer};
+use esp_hal::{clock::CpuClock, rng::Rng, timer::systimer::SystemTimer, timer::timg::TimerGroup};
 use esp_println::{print, println};
 use esp_wifi::{
     init,
@@ -34,6 +26,7 @@ use esp_wifi::{
     },
     EspWifiController,
 };
+use smoltcp::wire::Ipv4Address;
 
 macro_rules! make_static {
     ($t:ty,$val:expr) => {{
@@ -49,7 +42,8 @@ const GATEWAY_IP: &'static str = "192.168.2.1";
 #[esp_hal_embassy::main]
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
-    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
+    // let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
+    let config = esp_hal::Config::default();
     let peripherals = esp_hal::init(config);
 
     esp_alloc::heap_allocator!(72 * 1024);
@@ -69,7 +63,7 @@ async fn main(spawner: Spawner) -> ! {
     let systimer = SystemTimer::new(peripherals.SYSTIMER);
     esp_hal_embassy::init(systimer.alarm0);
 
-    let gateway_ip = Ipv4Addr::from_str(GATEWAY_IP).unwrap();
+    let gateway_ip = Ipv4Address::from_str(GATEWAY_IP).unwrap();
 
     let config = embassy_net::Config::ipv4_static(StaticConfigV4 {
         address: Ipv4Cidr::new(gateway_ip, 24),
@@ -88,7 +82,7 @@ async fn main(spawner: Spawner) -> ! {
 
     spawner.spawn(connection(controller)).ok();
     spawner.spawn(net_task(runner)).ok();
-    spawner.spawn(run_dhcp(stack, GATEWAY_IP)).ok();
+    spawner.spawn(run_dhcp(&stack, GATEWAY_IP)).ok();
 
     let mut rx_buffer = [0; 1536];
     let mut tx_buffer = [0; 1536];
@@ -105,7 +99,7 @@ async fn main(spawner: Spawner) -> ! {
     //     .config_v4()
     //     .inspect(|c| println!("ipv4 config: {c:?}"));
 
-    let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
+    let mut socket = TcpSocket::new(&stack, &mut rx_buffer, &mut tx_buffer);
     socket.set_timeout(Some(Duration::from_secs(10)));
     loop {
         println!("[HTTP] Listening...");
@@ -158,7 +152,8 @@ async fn main(spawner: Spawner) -> ! {
                 </body>\
             </html>\r\n\
             ",
-            ).await
+            )
+            .await
         {
             println!("write error: {:?}", e);
         }
@@ -176,7 +171,7 @@ async fn main(spawner: Spawner) -> ! {
 }
 
 #[embassy_executor::task]
-async fn run_dhcp(stack: Stack<'static>, gw_ip_addr: &'static str) {
+async fn run_dhcp(stack: &Stack::<'static>, gw_ip_addr: &'static str) {
     use core::net::{Ipv4Addr, SocketAddrV4};
 
     use edge_dhcp::{
@@ -193,7 +188,7 @@ async fn run_dhcp(stack: Stack<'static>, gw_ip_addr: &'static str) {
     let mut gw_buf = [Ipv4Addr::UNSPECIFIED];
 
     let buffers = UdpBuffers::<3, 1024, 1024, 10>::new();
-    let unbound_socket = Udp::new(stack, &buffers);
+    let unbound_socket = Udp::new(&stack, &buffers);
     let mut bound_socket = unbound_socket
         .bind(core::net::SocketAddr::V4(SocketAddrV4::new(
             Ipv4Addr::UNSPECIFIED,
@@ -209,8 +204,8 @@ async fn run_dhcp(stack: Stack<'static>, gw_ip_addr: &'static str) {
             &mut bound_socket,
             &mut buf,
         )
-            .await
-            .inspect_err(|e| log::warn!("[DHCP] Error: {e:?}"));
+        .await
+        .inspect_err(|e| log::warn!("[DHCP] Error: {e:?}"));
         Timer::after(Duration::from_millis(500)).await;
     }
 }
@@ -222,14 +217,14 @@ async fn connection(mut controller: WifiController<'static>) {
             WifiState::ApStarted => {
                 controller.wait_for_event(WifiEvent::ApStop).await;
                 Timer::after(Duration::from_millis(5000)).await
-            },
+            }
             _ => {}
         }
         if !matches!(controller.is_started(), Ok(true)) {
             let config = Configuration::AccessPoint(AccessPointConfiguration {
                 ssid: "HA:LED".try_into().unwrap(),
                 ssid_hidden: true,
-                // password: "cxllmerichie".try_into().unwrap(),
+                // password: "password".try_into().unwrap(),
                 // auth_method: AuthMethod::WPA2Personal,
                 max_connections: 2u16,
                 ..Default::default()
